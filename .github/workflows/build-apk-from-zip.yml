@@ -21,12 +21,12 @@ jobs:
           rm -rf project
           unzip -q habbo-watchtower-androidide.zip -d project
 
-          PROJECT_DIR="$(find project -maxdepth 3 -name settings.gradle -exec dirname {} \; | head -n 1)"
+          PROJECT_DIR="$(find project -maxdepth 4 -name settings.gradle -exec dirname {} \; | head -n 1)"
 
           if [ -z "$PROJECT_DIR" ]; then
             echo "Could not find settings.gradle after unzipping."
             echo "Zip contents:"
-            find project -maxdepth 4 -type f | head -100
+            find project -maxdepth 5 -type f | head -100
             exit 1
           fi
 
@@ -39,15 +39,15 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Make Gradle wrapper executable
-        run: |
-          cd "$PROJECT_DIR"
-          chmod +x ./gradlew
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "7.6.4"
 
       - name: Build debug APK
         run: |
           cd "$PROJECT_DIR"
-          ./gradlew :app:assembleDebug --stacktrace
+          gradle :app:assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
